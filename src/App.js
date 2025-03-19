@@ -1,12 +1,24 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; 
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ProductList from "./components/ProductList";
 import ProductDetail from "./components/ProductDetail";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
 
+// ✅ Create a QueryClient instance
 const queryClient = new QueryClient();
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const user = localStorage.getItem("loggedInUser");
+      setIsAuthenticated(!!user);
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
@@ -15,8 +27,16 @@ function App() {
             Product Store
           </h1>
           <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProductList />} />
             <Route path="/product/:id" element={<ProductDetail />} />
+
+            {/* Private Route for Dashboard */}
+            <Route
+              path="/dashboard"
+              element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+            />
           </Routes>
         </div>
       </Router>
