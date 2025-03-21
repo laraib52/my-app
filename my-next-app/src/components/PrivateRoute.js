@@ -1,10 +1,20 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
-const PrivateRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated");
+export default function PrivateRoute({ children }) {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      router.push("/"); // Redirect to login if not authenticated
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
-export default PrivateRoute;
+  if (!isAuthenticated) return null; // Prevent rendering if not authenticated
+
+  return <>{children}</>;
+}
